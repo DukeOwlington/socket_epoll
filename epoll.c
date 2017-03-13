@@ -117,7 +117,7 @@ int main(void) {
   int udp_sock; /* UDP descriptor */
   int tcp_sock; /* TCP descriptor */
   int tcp_usr_sock[MAX_TCP_USERS]; /* user connections on TCP socket */
-  int i, j;
+  int i, j, nfds;
   int efd;
   int fd; /* temp varible for storing user socket descriptor */
   int addrlen; /* address length for tcp */
@@ -156,12 +156,12 @@ int main(void) {
   }
   while (true) {
     fflush(stdout);
-    for (i = 0; i < MAX_TCP_USERS; i++) {
-      /* monitor set */
-      if (epoll_wait(efd, events, MAX_TCP_USERS + 2, -1) < 0) {
-        perror("poll");
-        return EXIT_FAILURE;
-      }
+    /* monitor set */
+    if (nfds = epoll_wait(efd, events, MAX_TCP_USERS + 2, -1) < 0) {
+     perror("poll");
+     return EXIT_FAILURE;
+    }   
+    for (i = 0; i < nfds; i++) {
       /* UDP connection scenario */
       if (events[i].data.fd == udp_sock && (events[i].events & EPOLLIN)) {
         if (HandleUDPConnection(udp_sock) < 0)
